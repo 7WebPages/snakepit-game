@@ -1,0 +1,123 @@
+* {
+    font-family: DejaVu Sans Mono,Bitstream Vera Sans Mono,monospace !important;
+    background-color: black;
+    color: silver;
+    font-size: 11pt;
+    text-align:center;
+    line-height: 1.2em;
+}
+
+a {
+    color: orange;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/*body {
+    -ms-transform: scale(1.2,1); /* IE 9
+    -webkit-transform: scale(1.2,1); /* Safari
+    transform: scale(1.2,1); /* Standard syntax
+}*/
+
+input {
+    border: 1px solid;
+    padding: 0.5em;
+    border-color: silver;
+    background: black;
+    color: lime;
+    font-size: 1em;
+    text-align: left;
+}
+
+button {
+    border: 0;
+    text-align: center;
+    background: silver;
+    color: green;
+    font-size: 1em;
+    padding: 0.5em;
+}
+
+.color0 { color:white }
+.color1 { color:red }
+.color2 { color:yellow }
+.color3 { color:lime }
+.color4 { color:aqua }
+.color5 { color:#4444FF }
+.color6 { color:fuchsia }
+
+
+#userButtons {
+    margin-top: 1em;
+}
+
+#btnJoin {
+    color: maroon;
+}
+#btnDisconnect {
+    color: black;
+}
+
+#playScreen {
+    display: none;
+}
+
+#connectForm{
+    margin-top: 2em;
+    margin-bottom: 5em;
+}
+
+#activePlayers, #topScores {
+    width: 13em;
+    color: white;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#activePlayers .name, #topScores .name {
+    width: 10em;
+    text-align: left;
+}
+#activePlayers .score, #topScores .score {
+    width: 3em;
+    text-align: right;
+}
+
+#activePlayers div, #topScores div {
+    display: inline-block;
+}
+
+#topScores {
+    text-align: left;
+}
+
+#playField {
+    margin-top: 1em;
+}
+
+#worldHolder {
+    display: inline-block;
+    border: 1px solid;
+    border-color: silver;
+    padding: 0.3em;
+    line-height: 1em;
+}
+
+#world {
+    padding:0;
+    border:0;
+    margin:0;
+    line-height: 1em;
+    table-layout: fixed
+}
+
+#world .td {
+    width: 1em;
+    height: 1em;
+
+    padding:0;
+    margin:0;
+    line-height: 1em;
+}

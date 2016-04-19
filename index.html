@@ -1,0 +1,230 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Snakepit</title>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script type="text/javascript">
+    var ws;
+    var playerName;
+    var playerId;
+
+    $().ready(function () {
+
+        $("#btnConnect").click(function () {
+            playerName = $("#playerName").val()
+            $("#status").text("connecting...");
+
+            ws_url = "ws://" + location.host + "/connect"
+            ws = new WebSocket(ws_url);
+            ws.onopen = openHandler;
+            ws.onmessage = messageHandler;
+            ws.onerror = function (e) {
+                $("#status").text(e.message);
+            };
+        });
+
+        $("#btnDisconnect").click(function () {
+            ws.close();
+            $("#playScreen").hide();
+            $("#mainScreen").show();
+            $(document).unbind("keypress", keyHandler);
+        });
+
+        $("#btnJoin").click(function () {
+            sendMessage(["join"]);
+        });
+    });
+
+    function sendMessage(msgArray) {
+        var msg = JSON.stringify(msgArray);
+        ws.send(msg);
+    }
+
+    function openHandler(e){
+        $("#status").text("connected to server");
+        playerName = $('#playerName').val();
+
+        sendMessage(["new_player", playerName]);
+
+        $("#mainScreen").hide();
+        $("#playScreen").show();
+
+        $(document).bind("keydown", keyHandler);
+
+    }
+
+    function messageHandler(e){
+        //$("#status").text(e.data);
+        json = JSON.parse(e.data);
+        if (!(json[0] instanceof Array))
+            json = [json];
+
+        for(var i = 0; i < json.length; i++){
+            var args = json[i];
+            var cmd = json[i][0];
+            switch(cmd){
+                case("handshake"):
+                    $("#username").text(args[1]);
+                    playerId = args[2];
+                    break
+                case("world"):
+                    initWorld(args[1]);
+                    break
+                case("reset_world"):
+                    resetWorld();
+                    break
+                case("r"):
+                    var x = args[1];
+                    var y = args[2];
+                    var cell_id = '#cell' + y + '_' + x;
+                    var symbol = args[3];
+                    if(symbol == " ")
+                        symbol = "&nbsp;";
+                    $(cell_id).html(symbol);
+                    $(cell_id).attr('class', "color" + args[4]);
+                    break
+                case("p_joined"):
+                    var id = args[1];
+                    var name = args[2];
+                    var color = args[3];
+                    var score = args[4];
+                    addPlayer(id, color, name, score);
+
+                    if(id == playerId)
+                        $("#btnJoin").css("visibility", "hidden");
+                    break
+                case("p_gameover"):
+                    id = args[1];
+                    $("#player" + id).remove();
+                    if(id == playerId)
+                        $("#btnJoin").css("visibility", "visible");
+                    break
+                case("p_score"):
+                    id = args[1];
+                    score = args[2];
+                    $("#player" + id + " .score").text(score);
+                    break
+                case("top_scores"):
+                    $("#topScoresList").empty();
+                    players = args[1];
+                    for(var n = 0; n < players.length; n++) {
+                        name = players[n][0];
+                        score = players[n][1];
+                        color = players[n][2];
+                        addTopScore(color, name, score);
+                    }
+            }
+        }
+    }
+
+    function initWorld(data) {
+        var rows = [];
+        for(var y = 0; y < data.length; y++){
+            var row = "";
+            for(var x = 0; x < data[y].length; x++){
+                symbol = data[y][x][0];
+                color = data[y][x][1];
+                if(symbol == " ")
+                    symbol = "&nbsp;";
+                row += '<td id="cell' + y + '_' + x +
+                    '" class="color' + color + '">' + symbol + '</td>';
+            }
+            rows.push("<tr>" + row + "</tr>");
+        }
+        var tableContent = rows.join("\n");
+        $("#world").html(tableContent);
+    }
+
+    function resetWorld() {
+        $("#world td").html("&nbsp;");
+    }
+
+    function addPlayer(id, color, name, score) {
+        var color_class = 'color' + color;
+        $("#activePlayers").append('<div id="player' + id + '">'
+                        + '<div class="name ' + color_class +'">' + name + '</div>'
+                        + '<div class="score ' + color_class + '">' + score + '</div></div>');
+    }
+
+    function addTopScore(color, name, score) {
+        var color_class = 'color' + color;
+        $("#topScoresList").append('<div>'
+                        + '<div class="name ' + color_class +'">' + name + '</div>'
+                        + '<div class="score ' + color_class + '">' + score + '</div></div>');
+    }
+
+    function keyHandler(event) {
+        var code = event.keyCode;
+        if (!code && event.charCode)
+             code = event.charCode;
+
+        if (ws && ws.readyState == WebSocket.OPEN) {
+            ws.send(code);
+            event.preventDefault();
+        }
+        else {
+            $("#status").text("Connection is closed");
+        }
+    }
+
+</script>
+</head>
+<body>
+
+<div id="status" style="text-align:left">&nbsp;</div>
+
+<div style="font-size: 3em;">Snakepit</div>
+<div>ver 0.1</div>
+
+<div style="margin-top:1em">
+    <div id="mainScreen">
+        <div id="connectForm">
+            <span style="color: white">Name</span>
+            <input id="playerName" type="text" maxlength="15" />
+            <button id="btnConnect">Connect</button>
+        </div>
+
+        <div>
+        <p><b style="color: white">Snakepit</b> is an open-source multiplayer snake game.</p>
+        <p>It is designed as a demo of <a href="https://docs.python.org/3/library/asyncio.html">asyncio</a> library for Python 3.5.</p>
+
+        <p style="color:red; margin-top: 7em">Rules:</p>
+
+        <div style="text-align: center;">
+            <span style="display: inline-block; text-align: left">
+            <span class="color2">1. Use arrows to control the snake.</span></br/></br/>
+            <span class="color3">2. Eat digits to grow up.</span></br/></br/>
+            <span class="color4">3. Do not bite: stones (#), snakes, borders.</span></br/></br/>
+            <span class="color6">4. Invite friends and have fun together!</span>
+            </span>
+        </div>
+        </div>
+    </div>
+
+    <div id="playScreen">
+        <div id="userForm">
+            Welcome to the server, <span id="username"></span>! Invite some friends and Join.
+        </div>
+        <div id="userButtons">
+            <button id="btnJoin">Join!</button>
+        </div>
+
+        <div id="playField">
+            <div id="activePlayers">Active players</div>
+            <div id="worldHolder">
+                <table id="world" cellspacing="0" cellpadding="0"></table>
+            </div>
+            <div id="topScores">
+                <div>Top scores</div>
+                <div id="topScoresList"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+</body>
+</html>
