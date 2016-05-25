@@ -46,10 +46,10 @@ async def wshandler(request):
                     player = game.new_player(data[1], ws)
             elif data[0] == "join":
                 if not game.running:
-                    asyncio.ensure_future(game_loop(game))
+                    game.reset_world()
 
                     print("Starting game loop")
-                    game.reset_world()
+                    asyncio.ensure_future(game_loop(game))
 
                 game.join(player)
 

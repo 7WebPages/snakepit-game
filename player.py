@@ -105,10 +105,13 @@ class Player:
         return render
 
     def keypress(self, code):
+        if not player.alive:
+            return
         direction = self.keymap.get(code)
         if direction:
             # do not move in the opposite direction
-            if not (direction.xdir == -self.direction.xdir and
+            if not (self.direction and
+                    direction.xdir == -self.direction.xdir and
                     direction.ydir == -self.direction.ydir):
                 self.direction = direction
 

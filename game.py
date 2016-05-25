@@ -191,7 +191,7 @@ class Game:
             # apply to local
             self._world[draw.y][draw.x] = Char(draw.char, draw.color)
             # send messages
-            messages.append(["r"] + list(draw))
+            messages.append(["render"] + list(draw))
         self.send_all_multi(messages)
 
     def render_text(self, text, color):
