@@ -105,7 +105,7 @@ class Player:
         return render
 
     def keypress(self, code):
-        if not player.alive:
+        if not self.alive:
             return
         direction = self.keymap.get(code)
         if direction:
