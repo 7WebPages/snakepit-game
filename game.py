@@ -77,11 +77,14 @@ class Game:
 
 
     def calc_top_scores(self, player):
-        if player.score:
-            ts_dict = dict(self._top_scores)
-            ts_dict[player.name] = player.score
-            self._top_scores = sorted(ts_dict.items(), key=lambda x: -x[1])
-            self._top_scores = self._top_scores[:settings.MAX_TOP_SCORES]
+        if not player.score:
+            return
+        ts_dict = dict(self._top_scores)
+        if player.score <= ts_dict.get(player.name, 0):
+            return
+        ts_dict[player.name] = player.score
+        self._top_scores = sorted(ts_dict.items(), key=lambda x: -x[1])
+        self._top_scores = self._top_scores[:settings.MAX_TOP_SCORES]
 
     def top_scores_msg(self):
         top_scores = [(t[0], t[1], randint(1, settings.NUM_COLORS))
