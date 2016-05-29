@@ -16,6 +16,7 @@ class Game:
         self._world = []
         self.running = False
         self.create_world()
+        self.read_top_scores()
 
     def create_world(self):
         for y in range(0, settings.FIELD_SIZE_Y):
@@ -67,25 +68,19 @@ class Game:
         self.calc_top_scores(player)
         self.send_all(*self.top_scores_msg())
 
-    def render_game_over(self, player):
         render = player.render_game_over()
         if not self.count_alive_players():
             render += self.render_text(" >>> GAME OVER <<< ",
                                        randint(1, settings.NUM_COLORS))
+            self.store_top_scores()
         return render
 
 
     def calc_top_scores(self, player):
-        if player.score and \
-           (len(self._top_scores) < settings.MAX_TOP_SCORES or
-            player.score > self._top_scores[-1]):
-
-            scores_dict = dict(self._top_scores)
-            if player.score < scores_dict.get(player.name, 0):
-                return
-            scores_dict[player.name] = player.score
-            self._top_scores = list(scores_dict.items())
-            self._top_scores.sort(key=lambda p: p[1], reverse=True)
+        if player.score:
+            ts_dict = dict(self._top_scores)
+            ts_dict[player.name] = player.score
+            self._top_scores = sorted(ts_dict.items(), key=lambda x: -x[1])
             self._top_scores = self._top_scores[:settings.MAX_TOP_SCORES]
 
     def top_scores_msg(self):
@@ -93,12 +88,28 @@ class Game:
                        for t in self._top_scores]
         return ("top_scores", top_scores)
 
+    def read_top_scores(self):
+        try:
+            f = open("top_scores.txt", "r+")
+            content = f.read()
+            if content:
+                self._top_scores = json.loads(content)
+            else:
+                self._top_scores = []
+            f.close()
+        except FileNotFoundError:
+            pass
+
+    def store_top_scores(self):
+        f = open("top_scores.txt", "w")
+        f.write(json.dumps(self._top_scores))
+        f.close()
+
 
     def player_disconnected(self, player):
         player.ws = None
         if player.alive:
-            self.game_over(player)
-            render = self.render_game_over(player)
+            render = self.game_over(player)
             self.apply_render(render)
         del self._players[player._id]
         del player
@@ -121,8 +132,7 @@ class Game:
                 if pos.x < 0 or pos.x >= settings.FIELD_SIZE_X or\
                    pos.y < 0 or pos.y >= settings.FIELD_SIZE_Y:
 
-                    self.game_over(p)
-                    render_all += self.render_game_over(p)
+                    render_all += self.game_over(p)
                     continue
 
                 char = self._world[pos.y][pos.x].char
@@ -133,8 +143,7 @@ class Game:
                     p.score += grow
                     messages.append(["p_score", p_id, p.score])
                 elif char != " ":
-                    self.game_over(p)
-                    render_all += self.render_game_over(p)
+                    render_all += self.game_over(p)
                     continue
 
                 render_all += p.render_move()
