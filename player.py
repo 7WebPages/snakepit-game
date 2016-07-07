@@ -95,7 +95,6 @@ class Player:
         # dead snake
         char_lookup = {0: self.DEAD_HEAD_CHAR,
                        len(self.snake) - 1: self.DEAD_TAIL_CHAR}
-        for i, pos in enumerate(self.snake):
         return [Draw(pos.x, pos.y, char_lookup.get(i, self.DEAD_BODY_CHAR), 0)
                 for i, pos in enumerate(self.snake)]
 
