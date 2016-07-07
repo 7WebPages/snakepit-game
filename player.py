@@ -92,17 +92,11 @@ class Player:
         return render
 
     def render_game_over(self):
-        render = []
         # dead snake
-        for i in range(0, len(self.snake)):
-            pos = self.snake[i]
-            if i == 0:
-                render.append(Draw(pos.x, pos.y, self.DEAD_HEAD_CHAR, 0))
-            elif i == len(self.snake) - 1:
-                render.append(Draw(pos.x, pos.y, self.DEAD_TAIL_CHAR, 0))
-            else:
-                render.append(Draw(pos.x, pos.y, self.DEAD_BODY_CHAR, 0))
-        return render
+        char_lookup = {0: self.DEAD_HEAD_CHAR,
+                       len(self.snake) - 1: self.DEAD_TAIL_CHAR}
+        return [Draw(pos.x, pos.y, char_lookup.get(i, self.DEAD_BODY_CHAR), 0)
+                for i, pos in enumerate(self.snake)]
 
     def keypress(self, code):
         if not self.alive:
