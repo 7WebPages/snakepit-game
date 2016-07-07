@@ -8,18 +8,14 @@ from game import Game
 
 async def handle(request):
     ALLOWED_FILES = ["index.html", "style.css"]
-
-    name = request.match_info.get('name')
-    if not name:
-        name = "index.html"
-    if name not in ALLOWED_FILES:
-        return web.Response(status=404)
-    try:
-        with open(name, 'rb') as index:
-            content = index.read()
-    except:
-        return web.Response(status=404)
-    return web.Response(body=content)
+    name = request.match_info.get('name', 'index.html')
+    if name in ALLOWED_FILES:
+        try:
+            with open(name, 'rb') as index:
+                return web.Response(body=index.read())
+        except FileNotFoundError:
+            pass
+    return web.Response(status=404)
 
 
 async def wshandler(request):
@@ -30,7 +26,7 @@ async def wshandler(request):
     await ws.prepare(request)
 
     player = None
-    while 1:
+    while True:
         msg = await ws.receive()
         if msg.tp == web.MsgType.text:
             print("Got message %s" % msg.data)
@@ -85,10 +81,5 @@ app.router.add_route('GET', '/{name}', handle)
 app.router.add_route('GET', '/', handle)
 
 # get port for heroku
-port = os.environ.get('PORT')
-if port:
-    port = int(port)
-else:
-    port = 5000
-
+port = int(os.environ.get('PORT', 5000))
 web.run_app(app, port=port)
