@@ -94,8 +94,7 @@ class Player:
     def render_game_over(self):
         render = []
         # dead snake
-        for i in range(0, len(self.snake)):
-            pos = self.snake[i]
+        for i, pos in enumerate(self.snake):
             if i == 0:
                 render.append(Draw(pos.x, pos.y, self.DEAD_HEAD_CHAR, 0))
             elif i == len(self.snake) - 1:
