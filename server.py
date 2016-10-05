@@ -12,7 +12,7 @@ async def handle(request):
     if name in ALLOWED_FILES:
         try:
             with open(name, 'rb') as index:
-                return web.Response(body=index.read())
+                return web.Response(body=index.read(), content_type='text/html')
         except FileNotFoundError:
             pass
     return web.Response(status=404)
