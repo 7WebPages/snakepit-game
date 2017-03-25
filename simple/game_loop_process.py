@@ -10,7 +10,7 @@ from time import sleep
 async def handle(request):
     index = open("index.html", 'rb')
     content = index.read()
-    return web.Response(body=content)
+    return web.Response(body=content, content_type='text/html')
 
 
 tick = asyncio.Condition()
