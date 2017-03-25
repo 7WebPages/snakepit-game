@@ -48,7 +48,7 @@ class Game:
         if player.alive:
             return
         if self.count_alive_players() == settings.MAX_PLAYERS:
-            self.send_personal(ws, "error", "Maximum players reached")
+            self.send_personal(player.ws, "error", "Maximum players reached")
             return
         # pick a color
         if not len(self._colors):
