@@ -33,6 +33,7 @@ class Player:
         self.ws = ws
         self.alive = False
         self.direction = None
+        self.intended_direction = None
 
     def new_snake(self, color):
         self.color = color
@@ -48,6 +49,7 @@ class Player:
         x = randint(distance, settings.FIELD_SIZE_X - distance)
         y = randint(distance, settings.FIELD_SIZE_Y - distance)
         self.direction = self.DIRECTIONS[randint(0, 3)]
+        self.intended_direction = self.direction
         # create snake from tail to head
         render = []
         pos = Position(x, y)
@@ -71,6 +73,7 @@ class Player:
     def render_move(self):
         # moving snake to the next position
         render = []
+        self.direction = self.intended_direction
         new_head = self.next_position()
         self.snake.appendleft(new_head)
         # draw head in the next position
@@ -112,5 +115,5 @@ class Player:
             if not (self.direction and
                     direction.xdir == -self.direction.xdir and
                     direction.ydir == -self.direction.ydir):
-                self.direction = direction
+                self.intended_direction = direction
 
